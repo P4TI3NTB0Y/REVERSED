@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeu de Reconnaissance de Chanson</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            overflow-y: scroll;
+        }
+        .container {
+            text-align: center;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            width: 90%;
+            max-width: 800px;
+        }
+        .audio-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .audio-item audio {
+            margin: 0 10px;
+        }
+        .audio-item input[type="text"] {
+            width: 200px;
+            padding: 10px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .audio-item button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #28a745;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        .audio-item button:hover {
+            background-color: #218838;
+        }
+        .result {
+            margin-top: 10px;
+            font-size: 16px;
+        }
+        #points {
+            font-size: 24px;
+            margin-top: 20px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Jeu de Reconnaissance de Chanson</h1>
+        <div id="points">Points: 0</div>
+        <div id="audio-container">
+            <!-- Les lecteurs audio et les champs de réponse seront ajoutés ici dynamiquement -->
+        </div>
+    </div>
+
+    <script>
+        const songs = [
+            { src: "audio/ACDC - Back In Black.mp3", artist: "AC DC" },
+            { src: "audio/Aerosmith - Crazy.mp3", artist: "Aerosmith" },
+            { src: "audio/A-Ha - Take On Me.mp3", artist: "A-Ha" },
+            { src: "audio/Al Green - Tired of Being Alone.mp3", artist: "Al Green" },
+            { src: "audio/Beck - Loser.mp3", artist: "Beck" },
+            { src: "audio/Bee Gees - How Deep Is Your Love.mp3", artist: "Bee Gees" },
+            { src: "audio/Blondie - Heart Of Glass.mp3", artist: "Blondie" },
+            { src: "audio/Bob Dylan - Like a Rolling Stone.mp3", artist: "Bob Dylan" },
+            { src: "audio/David Bowie - Space Oddity.mp3", artist: "David Bowie" },
+            { src: "audio/Eagles - Hotel California.mp3", artist: "Eagles" }
+        ];
+
+        let points = 0;
+        const totalSongs = songs.length;
+        let correctAnswers = 0;
+        let currentAudio = null;
+
+        const audioContainer = document.getElementById('audio-container');
+        const pointsDisplay = document.getElementById('points');
+
+        function startGame() {
+            loadGame();
+        }
+
+        function loadGame() {
+            songs.forEach((song, index) => {
+                const audioItem = document.createElement('div');
+                audioItem.className = 'audio-item';
+                audioItem.innerHTML = `
+                    <audio controls>
+                        <source src="${song.src}" type="audio/mpeg">
+                        Votre navigateur ne supporte pas l'élément audio.
+                    </audio>
+                    <input type="text" id="artist-name-${index}" placeholder="Entrez le nom de l'artiste">
+                    <button onclick="checkAnswer(${index})">Soumettre</button>
+                    <div class="result" id="result-${index}"></div>
+                `;
+                audioContainer.appendChild(audioItem);
+            });
+        }
+
+        function checkAnswer(index) {
+            const userAnswer = document.getElementById(`artist-name-${index}`).value.trim().toLowerCase();
+            const resultDiv = document.getElementById(`result-${index}`);
+            const correctArtist = songs[index].artist.toLowerCase();
+
+            if (userAnswer === correctArtist) {
+                if (!resultDiv.textContent.includes("Bravo")) { // Vérifie si la réponse était déjà correcte
+                    resultDiv.textContent = "Bravo! Vous avez trouvé le bon artiste!";
+                    resultDiv.style.color = 'green';
+                    points++;
+                    correctAnswers++;
+                    updatePoints();
+                }
+            } else {
+                resultDiv.textContent = "Désolé, ce n'est pas le bon artiste.";
+                resultDiv.style.color = 'red';
+            }
+
+            if (correctAnswers === totalSongs) {
+                points += 5; // Ajouter 5 points bonus
+                updatePoints();
+                alert("Félicitations! Vous avez deviné tous les artistes et gagné 5 points bonus!");
+            }
+        }
+
+        function updatePoints() {
+            pointsDisplay.textContent = `Points: ${points}`;
+        }
+
+        document.addEventListener('play', function(e) {
+            const audios = document.querySelectorAll('audio');
+            audios.forEach(audio => {
+                if (audio !== e.target) {
+                    audio.pause();
+                }
+            });
+            currentAudio = e.target;
+        }, true);
+
+        startGame();
+    </script>
+</body>
+</html>
